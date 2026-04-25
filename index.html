@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Trading Dashboard</title>
+  <style>
+    :root{--bg:#020617;--panel:#0f172a;--panel2:#111827;--border:#243244;--text:#e2e8f0;--muted:#94a3b8;--bull:#22c55e;--bear:#ef4444;--warn:#f59e0b;--neutral:#38bdf8}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}.container{max-width:1450px;margin:auto;padding:20px}h1{margin:0 0 8px;font-size:30px}.subtitle{color:var(--muted);margin-bottom:18px}.toolbar,.tabs,.indicator-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}button,.button-link{background:#1e293b;color:var(--text);border:1px solid #334155;padding:9px 14px;border-radius:8px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}button:hover,.button-link:hover{background:#334155}.tab-btn.active{background:#334155;border-color:#475569}.tab-panel{display:none}.tab-panel.active{display:block}.grid-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:18px}.card,.sidebox,.indicator-card,.empty-state,.hint-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px}.label,.sidebox-title{color:var(--muted);font-size:13px;margin-bottom:6px}.value{font-size:22px;font-weight:700;line-height:1.35;min-height:30px}.value.small{font-size:17px}.split{display:grid;grid-template-columns:2.1fr 1fr;gap:18px;align-items:start}@media(max-width:1050px){.split{grid-template-columns:1fr}}table{width:100%;border-collapse:collapse;background:var(--panel)}th,td{border:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}th{background:var(--panel2);color:var(--muted);font-size:13px}.bull{color:var(--bull)}.bear{color:var(--bear)}.warning{color:var(--warn)}.neutral{color:var(--neutral)}.textblock,.hint-box,.indicator-notes,.detail-box{white-space:pre-wrap;line-height:1.55}.muted,.history-meta{color:var(--muted);font-size:12px}.info-btn{width:34px;min-width:34px;height:34px;padding:0}.detail-row{display:none}.detail-row.open{display:table-row}.detail-box{padding:14px;background:#0b1220;border-left:3px solid #334155}.history-item{background:#0b1220;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}.history-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}.diag-pass{color:var(--bull)}.diag-fail{color:var(--bear)}.indicator-grid{display:grid;grid-template-columns:1fr;gap:14px}.indicator-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px}.indicator-title{font-size:18px;font-weight:700}.indicator-actions{display:flex;gap:8px;flex-wrap:wrap}.pill{display:inline-flex;align-items:center;border:1px solid #334155;border-radius:999px;padding:4px 10px;font-size:12px;color:var(--muted);background:#0b1220}.indicator-simple{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:16px;align-items:start}@media(max-width:900px){.indicator-simple{grid-template-columns:1fr}}.field{display:flex;flex-direction:column;gap:6px}.field label{color:var(--muted);font-size:12px}.field input,.field textarea{width:100%;background:#020617;color:var(--text);border:1px solid #334155;border-radius:8px;padding:10px;font:inherit}.field textarea{min-height:84px;resize:vertical}.link-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end}.indicator-preview{border:1px solid var(--border);background:#020617;border-radius:10px;min-height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-top:10px}.indicator-preview img{width:100%;max-height:340px;object-fit:contain;display:block}.indicator-notes{background:#0b1220;border:1px solid var(--border);border-radius:10px;padding:12px;min-height:70px}.indicator-meta{display:grid;gap:10px}.detail-panel{display:none;margin-top:10px}.detail-panel.open{display:block}.mini-btn{padding:7px 10px;font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ETH - Dashboard</h1>
+    <div class="subtitle">Tableau d’analyse + onglet indicateurs externes.</div>
+    <div class="tabs"><button class="tab-btn active" data-tab="analysis-tab">Tableau d'analyse</button><button class="tab-btn" data-tab="indicators-tab">Indicateurs / liens</button></div>
+
+    <div id="analysis-tab" class="tab-panel active">
+      <div class="toolbar"><button id="analyze-btn">Analyse pro</button><button id="save-btn">💾 Sauvegarder un snapshot</button><button id="restore-last-btn">↩️ Restaurer le dernier snapshot</button><button id="export-btn">Exporter JSON</button><button id="import-btn">Importer JSON</button><button id="diag-btn">Diagnostics</button></div>
+      <div class="grid-top">
+        <div class="card"><div class="label">Actif / Date</div><div class="value" contenteditable="true" id="asset">ETH - 05/04/2026</div></div>
+        <div class="card"><div class="label">Timeframes</div><div class="value small" contenteditable="true" id="timeframes">30m / 5m</div></div>
+        <div class="card"><div class="label">Biais</div><div class="value warning" contenteditable="true" id="bias">Haussier court terme → épuisement</div></div>
+        <div class="card"><div class="label">Score</div><div class="value" contenteditable="true" id="score">2 / 5</div></div>
+        <div class="card"><div class="label">Setup</div><div class="value small" contenteditable="true" id="setup">Breakout faible / probable fake</div></div>
+        <div class="card"><div class="label">Lecture déclenchement</div><div class="value small warning" contenteditable="true" id="lecture">Move haussier réel mais non soutenu par OI → probabilité élevée de retour vers zone de valeur.</div></div>
+      </div>
+      <div class="split">
+        <div><table><thead><tr><th>Bloc</th><th>Indicateur</th><th>Observation</th><th>Lecture pro</th><th>Impact</th><th>Info</th></tr></thead><tbody id="table-body"></tbody></table></div>
+        <div>
+          <div class="sidebox"><div class="sidebox-title">Zones</div><div class="textblock" contenteditable="true" id="zones">Résistance : ~2120–2140
+Zone actuelle : ~2110
+POC : ~2060
+Support : ~2080
+Bas range : ~2030</div></div>
+          <div class="sidebox"><div class="sidebox-title">Scénario</div><div class="textblock" contenteditable="true" id="scenario">LONG si :
+- Acceptation > 2140
+- ET OI monte
+
+SHORT si :
+- Rejet confirmé sous 2120
+- Retour sous 2100
+
+Sinon : NO TRADE</div></div>
+          <div class="sidebox"><div class="sidebox-title">Risque</div><div class="textblock" contenteditable="true" id="risk">Fake breakout probable.
+OI ne valide pas.
+Acheteurs piégés possibles.
+Retour vers POC probable.</div></div>
+          <div class="sidebox"><div class="sidebox-title">Historique des snapshots</div><div id="history" class="muted">Aucun snapshot pour le moment.</div></div>
+          <div class="sidebox"><div class="sidebox-title">Export / Import JSON</div><textarea id="json-box" style="width:100%;min-height:160px;background:#020617;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:10px"></textarea></div>
+          <div class="sidebox"><div class="sidebox-title">Diagnostics</div><div id="diagnostics" class="muted">Aucun test lancé.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="indicators-tab" class="tab-panel">
+      <div class="indicator-toolbar"><button id="add-indicator-btn">+ Ajouter un indicateur</button><button id="save-indicators-btn">💾 Sauvegarder les indicateurs</button></div>
+      <div class="hint-box">Affichage simplifié : nom, lien + boutons Ouvrir/Copier, commentaire perso, Lire la page, Commenter, Développer, image importée avec preview.</div>
+      <div id="indicators-list" class="indicator-grid"></div>
+      <div id="indicators-empty" class="empty-state">Aucun indicateur externe ajouté pour le moment.</div>
+    </div>
+  </div>
+
+<script>
+const INDICATOR_STORAGE_KEY = 'crypto_dashboard_indicators_v4';
+const STORAGE_KEY = 'crypto_dashboard_snapshots_v1';
+
+const EXPLANATIONS = {
+  'Prix (1D / 4H)': `CONTEXTE HTF
+Sans 1D / 4H, l'analyse reste fragile. Cherche tendance, range, supports, résistances et structure.` ,
+  'CVD_HTF': `CVD HTF : filtre de flux de fond. Prix qui monte sans CVD = risque de distribution.`,
+  'Open Interest_HTF': `OI HTF : valide si le marché construit des positions. Prix + OI en hausse = move plus solide.`,
+  'Funding_HTF': `Funding HTF : mesure l'excès long/short. Sert à repérer les pièges, pas à entrer seul.`,
+  'Volume Profile / POC': `POC = zone de valeur. Le prix y revient souvent si aucun trend fort ne s'installe.`,
+  'Prix (1H / 30m)': `Structure MTF : range, breakout, rejet, vitesse. C'est le contexte opérationnel.`,
+  'CVD_MTF': `CVD MTF : confirme ou invalide le move sur l'horizon intermédiaire.`,
+  'Open Interest_MTF': `OI MTF : détecteur de fake breakout. Prix monte sans OI = méfiance.`,
+  'Delta': `Delta : agression instantanée. Delta fort en haut peut signaler des retardataires.`,
+  'Liquidations_MTF': `Liquidations MTF : carburant du mouvement. Sans liquidations, le move peut manquer d'accélération.`,
+  'Market type': `Type de marché : trend, range ou transition. La stratégie dépend de ça.`,
+  'Prix (5m)': `Prix LTF : timing d'entrée, rejet, acceptation, micro-structure.`,
+  'CVD_LTF': `CVD LTF : montre si le flux court terme confirme ou si le move est consommé.`,
+  'Open Interest_LTF': `OI LTF : valide l'entrée. OI qui ne suit pas = piège possible.`,
+  'Delta / Volume Delta': `Delta + prix : delta positif + prix bloque = absorption vendeuse ; delta négatif + prix tient = absorption acheteuse.`,
+  'Liquidations_LTF': `Liquidations LTF : targets naturelles et accélérations possibles.`,
+  'Who is trapped': `Qui est piégé ? longs piégés = dump possible ; shorts piégés = squeeze possible.`,
+  'Liquidité': `Liquidité : le marché cherche souvent les poches de stops/levier.`,
+  'Divergence': `Divergence : essoufflement potentiel quand prix et flux ne confirment plus.`
+};
+
+const defaultRows = [
+  ['HTF','Prix (1D / 4H)'],['HTF','CVD'],['HTF','Open Interest'],['HTF','Funding'],['HTF','Volume Profile / POC'],
+  ['MTF','Prix (1H / 30m)'],['MTF','CVD'],['MTF','Open Interest'],['MTF','Delta'],['MTF','Liquidations'],['MTF','Market type'],
+  ['LTF','Prix (5m)'],['LTF','CVD'],['LTF','Open Interest'],['LTF','Delta / Volume Delta'],['LTF','Liquidations'],['LTF','Who is trapped'],['LTF','Liquidité'],['LTF','Divergence']
+].map(([bloc,indicateur])=>({bloc,indicateur,observation:'',lecture:'',impact:'',status:'neutral'}));
+
+let rows = JSON.parse(JSON.stringify(defaultRows));
+let externalIndicators = loadIndicators();
+
+function safeHtml(value){return String(value==null?'':value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+function normalizeUrl(value){let url=String(value||'').trim(); if(!url)return ''; if(!/^https?:\/\//i.test(url))url='https://'+url; return url;}
+function getStatusClass(status){if(status==='bull')return 'bull'; if(status==='bear')return 'bear'; if(status==='warning')return 'warning'; return 'neutral';}
+function parseLinks(raw){return String(raw||'').split(/\n+/).map(normalizeUrl).filter(Boolean);}
+
+function getExplanation(row){
+  const key = row.bloc==='HTF'&&row.indicateur==='CVD'?'CVD_HTF':
+    row.bloc==='HTF'&&row.indicateur==='Open Interest'?'Open Interest_HTF':
+    row.bloc==='HTF'&&row.indicateur==='Funding'?'Funding_HTF':
+    row.bloc==='MTF'&&row.indicateur==='CVD'?'CVD_MTF':
+    row.bloc==='MTF'&&row.indicateur==='Open Interest'?'Open Interest_MTF':
+    row.bloc==='MTF'&&row.indicateur==='Liquidations'?'Liquidations_MTF':
+    row.bloc==='LTF'&&row.indicateur==='CVD'?'CVD_LTF':
+    row.bloc==='LTF'&&row.indicateur==='Open Interest'?'Open Interest_LTF':
+    row.bloc==='LTF'&&row.indicateur==='Liquidations'?'Liquidations_LTF':row.indicateur;
+  return EXPLANATIONS[key] || 'Pas d’explication détaillée enregistrée pour cet indicateur.';
+}
+function setRow(bloc,indicateur,data){const i=rows.findIndex(r=>r.bloc===bloc&&r.indicateur===indicateur); if(i!==-1)Object.assign(rows[i],data);}
+function prefillRows(){
+  setRow('HTF','Prix (1D / 4H)',{observation:'NON DISPONIBLE',lecture:'Contexte macro inconnu',impact:'Neutre',status:'warning'});
+  setRow('MTF','Open Interest',{observation:'OI flat / pas d’accélération',lecture:'Move porté par fermeture de shorts, pas par nouveaux longs',impact:'Baissier pour continuation',status:'bear'});
+  setRow('LTF','Liquidité',{observation:'Cluster vendeur ~2120 / POC ~2060',lecture:'Rejet probable vers zone de valeur',impact:'Baissier vers POC',status:'bear'});
+}
+
+function defaultIndicator(){return {id:'demo-btc-loss-utxos',name:'Bitcoin UTXOs in Loss',type:'page web',link:'https://www.coinglass.com/pro/i/bitcoin-loss-utxos',userComment:'',aiComment:'Cet indicateur montre combien d’UTXO Bitcoin sont actuellement en perte. Il sert à mesurer la douleur du marché et la capitulation.',aiDetail:detectIndicatorHints({name:'Bitcoin UTXOs in Loss',link:'https://www.coinglass.com/pro/i/bitcoin-loss-utxos'}).detail,image:''};}
+function loadIndicators(){
+  const keys=[
+    INDICATOR_STORAGE_KEY,
+    'crypto_dashboard_indicators_v3',
+    'crypto_dashboard_indicators_v2',
+    'crypto_dashboard_indicators_v1',
+    'indicators'
+  ];
+  for(const key of keys){
+    try{
+      const parsed=JSON.parse(localStorage.getItem(key)||'[]');
+      if(Array.isArray(parsed)&&parsed.length){
+        const restored=parsed.map(normalizeIndicator);
+        localStorage.setItem(INDICATOR_STORAGE_KEY,JSON.stringify(restored));
+        return restored;
+      }
+    }catch(e){}
+  }
+  return [defaultIndicator()];
+}
+function normalizeIndicator(indicator){return {id:indicator.id||('ind-'+Date.now()+'-'+Math.random().toString(16).slice(2,8)),name:indicator.name||'Nouvel indicateur',type:indicator.type||'page web',link:normalizeUrl(indicator.link||indicator.linksText||''),userComment:indicator.userComment||'',aiComment:indicator.aiComment||'',aiDetail:indicator.aiDetail||'',image:indicator.image||indicator.localImage||''};}
+function createIndicatorTemplate(){return normalizeIndicator({name:'Nouvel indicateur'});}
+
+async function readPageDescription(url){
+  const normalized=normalizeUrl(url); if(!normalized)throw new Error('Lien vide');
+  const proxyUrl='https://api.allorigins.win/raw?url='+encodeURIComponent(normalized);
+  const response=await fetch(proxyUrl); if(!response.ok)throw new Error('Page inaccessible');
+  const raw=await response.text(); return extractUsefulPageText(raw);
+}
+function extractUsefulPageText(raw){
+  const html=String(raw||''); const parser=new DOMParser(); const doc=parser.parseFromString(html,'text/html');
+  const titleEl=doc.querySelector('title'); const title=titleEl?titleEl.textContent.trim():'';
+  const meta=doc.querySelector('meta[name="description"]')||doc.querySelector('meta[property="og:description"]');
+  const description=meta?(meta.getAttribute('content')||'').trim():'';
+  const bodyText=(doc.body?doc.body.textContent:html).replace(/\s+/g,' ').trim();
+  const lower=bodyText.toLowerCase(); const idx=lower.indexOf('chart description');
+  const chartDescription=idx>=0?bodyText.slice(idx,idx+1300):'';
+  return {title,description,chartDescription,textSample:bodyText.slice(0,2000)};
+}
+function generateCommentFromOfficialText(indicator,pageInfo){
+  const official=[pageInfo.title,pageInfo.description,pageInfo.chartDescription,pageInfo.textSample].filter(Boolean).join('\n\n');
+  const low=official.toLowerCase();
+  if(low.includes('amount of liquidated short positions')||low.includes('short squeeze')||low.includes('liquidated short positions')){
+    return {short:'Short Liquidations mesure le montant des positions short liquidées. Une hausse brusque pendant une montée peut déclencher ou prolonger un short squeeze.',detail:'DESCRIPTION OFFICIELLE EXTRAITE\n\n'+official.slice(0,1200)+'\n\nLECTURE PRO\n\n1) Ce que ça mesure\nMontant des positions short liquidées sur les dérivés. Ce sont des vendeurs forcés de fermer leur position.\n\n2) Mécanique\nPrix en hausse rapide -> shorts en perte -> liquidations forcées -> rachats forcés -> hausse supplémentaire possible.\n\n3) Interprétation\n- spike short liquidation + prix qui continue = squeeze actif\n- spike short liquidation + prix qui bloque = possible fin de squeeze\n\n4) A croiser avec\nPrix, OI, CVD, delta, footprint et résistance.\n\nConclusion\nC’est d’abord un carburant haussier forcé. Le short ne devient intéressant qu’après preuve d’absorption ou de rejet.'};
+  }
+  if(low.includes('realized price')||low.includes('realised price'))return detectIndicatorHints({...indicator,name:'Realized Price '+indicator.name});
+  if(low.includes('mvrv')||low.includes('z-score')||low.includes('zscore'))return detectIndicatorHints({...indicator,name:'MVRV Z-Score '+indicator.name});
+  return {short:pageInfo.description||'Description officielle récupérée. Clique sur Développer pour l’analyse.',detail:'DESCRIPTION OFFICIELLE EXTRAITE\n\n'+official.slice(0,1800)+'\n\nLECTURE PRO\n\n1) Ce que ça mesure\nLire la description officielle ci-dessus.\n\n2) Comment l’utiliser\nIdentifier si l’indicateur mesure le flux, le positionnement, la liquidité, le cycle ou le sentiment.\n\n3) Interprétation\nLe signal est utile seulement s’il confirme ou diverge du prix.\n\n4) A croiser\nPrix, OI, CVD, funding, liquidations et footprint.'};
+}
+
+function detectIndicatorHints(indicator){
+  const corpus=`${indicator.name||''} ${indicator.type||''} ${indicator.link||''} ${indicator.userComment||''}`.toLowerCase();
+  if(corpus.includes('utxo')||corpus.includes('bitcoin-loss-utxos'))return {short:'Cet indicateur montre combien d’UTXO Bitcoin sont en perte. Il sert à mesurer la douleur du marché et les phases de capitulation.',detail:`BITCOIN UTXOs IN LOSS — lecture complète
+
+1) Ce que ça mesure
+Un UTXO est une sortie non dépensée sur Bitcoin. Cet indicateur compte les UTXO dont le prix d’acquisition est supérieur au prix actuel du BTC.
+
+2) A quoi ça sert
+Lire le stress, la capitulation et les zones où beaucoup de détenteurs sont sous l’eau.
+
+3) Lecture haussière
+Pic élevé + prix qui cesse de baisser = capitulation avancée, possible zone de bottom.
+
+4) Lecture baissière
+Indicateur qui monte pendant un breakdown = capitulation encore active.
+
+5) Erreur classique
+Beaucoup d’UTXO en perte ne signifie pas acheter immédiatement. Le timing vient du prix, CVD, OI, liquidations et footprint.
+
+Conclusion
+Indicateur de cycle et de sentiment extrême, pas de timing court terme.`};
+  if(corpus.includes('short-liquidation')||corpus.includes('short liquidation')||corpus.includes('liquidated short'))return {short:'Short Liquidations mesure les shorts forcés de fermer. Une hausse brutale indique souvent un short squeeze.',detail:`SHORT LIQUIDATIONS — lecture complète
+
+1) Ce que ça mesure
+Montant des positions short liquidées sur le marché dérivé.
+
+2) Mécanique
+Prix monte -> shorts en perte -> fermetures forcées -> achats forcés -> hausse potentielle supplémentaire.
+
+3) Signal haussier
+Short liquidations + prix qui continue = squeeze actif.
+
+4) Fin de squeeze
+Short liquidations importantes + prix qui bloque = possible fin du mouvement.
+
+5) Erreur classique
+Shorter immédiatement un spike de short liquidations. C’est dangereux : c’est d’abord du carburant haussier.
+
+Conclusion
+Signal de pression haussière forcée, à croiser avec prix, OI, CVD et footprint.`};
+  if(corpus.includes('long-liquidation')||corpus.includes('long liquidation')||corpus.includes('liquidated long'))return {short:'Long Liquidations mesure les longs forcés de fermer. Une hausse brutale indique souvent une cascade baissière.',detail:`LONG LIQUIDATIONS — lecture complète
+
+1) Ce que ça mesure
+Montant des positions long liquidées.
+
+2) Mécanique
+Prix baisse -> longs en perte -> vente forcée -> cascade baissière possible.
+
+3) Signal baissier
+Long liquidations + prix qui continue de baisser = flush actif.
+
+4) Fin de flush
+Long liquidations importantes + prix qui tient = absorption acheteuse possible.
+
+Conclusion
+Carburant baissier forcé. Le long devient intéressant seulement si le prix tient malgré les liquidations.`};
+  if(corpus.includes('realized-price')||corpus.includes('realised-price')||corpus.includes('realized price')||corpus.includes('realised price'))return {short:'Le Realized Price donne le prix moyen d’acquisition estimé des BTC. Il montre si le marché est globalement en profit ou en perte.',detail:`BITCOIN REALIZED PRICE — lecture complète
+
+1) Ce que ça mesure
+Valeur des BTC au prix auquel ils ont été déplacés pour la dernière fois, divisée par l’offre en circulation.
+
+2) Lecture
+Prix au-dessus = marché globalement en profit. Prix en dessous = stress / pertes latentes.
+
+3) Utilisation
+Indicateur macro de régime de marché, pas un signal d’entrée scalping.
+
+4) A croiser
+MVRV, UTXO in Loss, NUPL, SOPR, funding, OI.
+
+Conclusion
+Utile pour identifier bull/bear regime et zones de capitulation.`};
+  if(corpus.includes('mvrv')||corpus.includes('zscore')||corpus.includes('z-score'))return {short:'Le MVRV Z-Score mesure si Bitcoin est surévalué ou sous-évalué par rapport à sa valeur réalisée.',detail:`MVRV Z-SCORE — lecture avancée
+
+1) Ce que ça mesure
+Ecart entre Market Value et Realized Value, normalisé en Z-score.
+
+2) Lecture
+Z-score élevé = surévaluation / zone de top. Z-score bas = sous-évaluation / zone de bottom.
+
+3) Important
+Indicateur de cycle, pas de timing court terme.
+
+4) A croiser
+UTXO in Loss, Realized Price, funding, OI, structure HTF.
+
+Conclusion
+Contexte macro, pas point d’entrée.`};
+  if(corpus.includes('cvd'))return {short:'Le CVD mesure l’écart cumulé entre achats agressifs et ventes agressives.',detail:'Prix + CVD dans le même sens = confirmation. Prix qui monte avec CVD qui diverge = absorption vendeuse possible. Prix baisse mais CVD tient = absorption acheteuse possible.'};
+  if(corpus.includes('open interest')||/\boi\b/.test(corpus))return {short:'L’Open Interest indique si de nouvelles positions entrent réellement dans le marché.',detail:'Prix + OI en hausse = conviction. Prix monte mais OI baisse = short covering. Prix baisse et OI monte = nouveaux shorts. Sans OI, méfiance.'};
+  if(corpus.includes('funding'))return {short:'Le funding mesure le biais des positions perpétuelles.',detail:'Funding très positif = excès de longs. Funding très négatif = excès de shorts. Toujours croiser avec prix, OI et CVD.'};
+  if(corpus.includes('heatmap')||corpus.includes('liquidation'))return {short:'Indicateur lié aux liquidations : il faut distinguer short liquidations, long liquidations et heatmap.',detail:'Short liquidations = achats forcés. Long liquidations = ventes forcées. Heatmap = zones potentielles de liquidations. Le signal vient de la réaction du prix après déclenchement.'};
+  if(corpus.includes('footprint'))return {short:'Le footprint montre les volumes bid/ask dans chaque bougie.',detail:'Delta positif + prix avance = continuation. Delta positif + prix bloque = absorption vendeuse. Delta négatif + prix tient = absorption acheteuse.'};
+  return {short:'Cette ressource externe sert de contexte ou de confirmation.',detail:'Identifie ce que ça mesure : flux, positionnement, liquidité, structure, cycle ou sentiment. Puis vérifie si ça confirme ou diverge du prix.'};
+}
+
+function getSnapshotState(){return {asset:asset.innerText,timeframes:timeframes.innerText,bias:bias.innerText,score:score.innerText,setup:setup.innerText,lecture:lecture.innerText,zones:zones.innerText,scenario:scenario.innerText,risk:risk.innerText,rows:JSON.parse(JSON.stringify(rows)),externalIndicators:JSON.parse(JSON.stringify(externalIndicators))};}
+function applySnapshotState(state){if(!state)return; asset.innerText=state.asset||'ETH'; timeframes.innerText=state.timeframes||'30m / 5m'; bias.innerText=state.bias||''; score.innerText=state.score||''; setup.innerText=state.setup||''; lecture.innerText=state.lecture||''; zones.innerText=state.zones||''; scenario.innerText=state.scenario||''; risk.innerText=state.risk||''; rows=Array.isArray(state.rows)?JSON.parse(JSON.stringify(state.rows)):JSON.parse(JSON.stringify(defaultRows)); externalIndicators=Array.isArray(state.externalIndicators)?state.externalIndicators.map(normalizeIndicator):loadIndicators(); renderTable(); renderIndicators();}
+function getSnapshots(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch(e){return[]}}
+function setSnapshots(data){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
+function saveSnapshot(){const snapshots=getSnapshots(); snapshots.push({savedAt:new Date().toLocaleString('fr-FR'),state:getSnapshotState()}); setSnapshots(snapshots); renderHistory();}
+function restoreLastSnapshot(){const snapshots=getSnapshots(); if(!snapshots.length){alert('Aucun snapshot.');return;} applySnapshotState(snapshots[snapshots.length-1].state);}
+function restoreSnapshot(index){const snapshots=getSnapshots(); if(snapshots[index])applySnapshotState(snapshots[index].state);}
+function exportJson(){document.getElementById('json-box').value=JSON.stringify({current:getSnapshotState(),snapshots:getSnapshots()},null,2);}
+function importJson(){try{const parsed=JSON.parse(document.getElementById('json-box').value||'{}'); if(Array.isArray(parsed.snapshots))setSnapshots(parsed.snapshots); if(parsed.current)applySnapshotState(parsed.current); renderHistory();}catch(e){alert('JSON invalide.');}}
+function runAnalysis(){bias.innerText='NEUTRE (range court terme)'; score.innerText='2 / 5'; setup.innerText='Test haut de range sans confirmation'; lecture.innerText='Impulsion haussière visible mais sans soutien OI, risque de rejet élevé.';}
+
+function renderTable(){
+  const tbody=document.getElementById('table-body'); tbody.innerHTML=''; let currentBloc=null;
+  rows.forEach((row,index)=>{
+    if(row.bloc!==currentBloc){currentBloc=row.bloc; const br=document.createElement('tr'); br.innerHTML=`<td colspan="6" style="background:#020617;font-weight:bold;color:#94a3b8;padding:14px;border-top:2px solid #334155;">${currentBloc==='LTF'?'LTF (5m)':safeHtml(currentBloc)}</td>`; tbody.appendChild(br);}
+    const tr=document.createElement('tr'); tr.innerHTML=`<td>${safeHtml(row.bloc)}</td><td>${safeHtml(row.indicateur)}</td><td contenteditable="true" data-index="${index}" data-field="observation">${safeHtml(row.observation)}</td><td contenteditable="true" data-index="${index}" data-field="lecture">${safeHtml(row.lecture)}</td><td contenteditable="true" data-index="${index}" data-field="impact" class="${getStatusClass(row.status)}">${safeHtml(row.impact)}</td><td><button class="info-btn" data-index="${index}">+</button></td>`; tbody.appendChild(tr);
+    const detail=document.createElement('tr'); detail.className='detail-row'; detail.id=`detail-${index}`; detail.innerHTML=`<td colspan="6"><div class="detail-box"><strong>${safeHtml(row.indicateur)}</strong>\n\n${safeHtml(getExplanation(row))}</div></td>`; tbody.appendChild(detail);
+  });
+  tbody.querySelectorAll('[contenteditable="true"]').forEach(cell=>cell.addEventListener('input',e=>{const idx=Number(e.currentTarget.dataset.index); rows[idx][e.currentTarget.dataset.field]=e.currentTarget.innerText;}));
+  tbody.querySelectorAll('.info-btn').forEach(btn=>btn.addEventListener('click',e=>{const idx=e.currentTarget.dataset.index; const d=document.getElementById(`detail-${idx}`); const open=d.classList.contains('open'); d.classList.toggle('open',!open); e.currentTarget.innerText=open?'+':'-';}));
+}
+function renderHistory(){const box=document.getElementById('history'); const snaps=getSnapshots(); if(!snaps.length){box.innerHTML='Aucun snapshot pour le moment.';return;} box.innerHTML=''; snaps.slice().reverse().forEach((snap,ri)=>{const real=snaps.length-1-ri; const item=document.createElement('div'); item.className='history-item'; item.innerHTML=`<div class="history-head"><div><strong>${safeHtml(snap.state.asset||'ETH')}</strong> · ${safeHtml(snap.state.timeframes||'')}<div class="history-meta">Sauvegardé le ${safeHtml(snap.savedAt)}</div></div><button data-restore="${real}">Charger</button></div><div class="history-meta">Biais: ${safeHtml(snap.state.bias||'')} · Score: ${safeHtml(snap.state.score||'')}</div>`; box.appendChild(item);}); box.querySelectorAll('button[data-restore]').forEach(btn=>btn.addEventListener('click',e=>restoreSnapshot(Number(e.currentTarget.dataset.restore))));}
+function saveIndicators(){localStorage.setItem(INDICATOR_STORAGE_KEY,JSON.stringify(externalIndicators)); renderIndicators();}
+function renderIndicators(){
+  const list=document.getElementById('indicators-list'); const empty=document.getElementById('indicators-empty'); externalIndicators=externalIndicators.map(normalizeIndicator); list.innerHTML=''; empty.style.display=externalIndicators.length?'none':'block';
+  externalIndicators.forEach(indicator=>{
+    const card=document.createElement('div'); card.className='indicator-card'; const detailId=`indicator-detail-${indicator.id}`; const imageHtml=indicator.image?`<img src="${safeHtml(indicator.image)}" alt="preview ${safeHtml(indicator.name)}" />`:'<span class="muted">Ajoute une image avec le bouton ci-dessus.</span>'; const href=normalizeUrl(indicator.link);
+    card.innerHTML=`<div class="indicator-head"><div><div class="indicator-title">${safeHtml(indicator.name||'Indicateur sans nom')}</div><div class="pill">${safeHtml(indicator.type||'ressource')}</div></div><div class="indicator-actions"><button class="mini-btn read-page-btn" data-id="${indicator.id}">Lire la page</button><button class="mini-btn comment-btn" data-id="${indicator.id}">Commenter</button><button class="mini-btn toggle-detail-btn" data-detail="${detailId}">Développer</button></div></div><div class="indicator-simple"><div><div class="field"><label>Image / capture</label><input type="file" accept="image/*" data-upload-id="${indicator.id}" /></div><div class="indicator-preview">${imageHtml}</div></div><div class="indicator-meta"><div class="field"><label>Nom</label><input type="text" data-id="${indicator.id}" data-field="name" value="${safeHtml(indicator.name)}" /></div><div class="field"><label>Lien</label><div class="link-row"><input type="text" data-id="${indicator.id}" data-field="link" value="${safeHtml(indicator.link)}" placeholder="https://..." /><button class="open-link-btn" data-id="${indicator.id}">Ouvrir</button><button class="copy-link-btn" data-id="${indicator.id}">Copier</button></div><div class="muted" style="margin-top:6px;word-break:break-all;">${safeHtml(href||'')}</div></div><div class="field"><label>Ton commentaire</label><textarea data-id="${indicator.id}" data-field="userComment">${safeHtml(indicator.userComment)}</textarea></div><div><div class="label">Commentaire IA</div><div class="indicator-notes">${safeHtml(indicator.aiComment||'Clique sur Commenter.')}</div></div><div id="${detailId}" class="detail-panel"><div class="label">Interprétation détaillée</div><div class="indicator-notes">${safeHtml(indicator.aiDetail||'Aucun détail pour le moment.')}</div></div></div></div>`;
+    list.appendChild(card);
+  });
+  list.querySelectorAll('input[data-field],textarea[data-field]').forEach(input=>{input.addEventListener('input',e=>{const ind=externalIndicators.find(x=>x.id===e.currentTarget.dataset.id); if(ind)ind[e.currentTarget.dataset.field]=e.currentTarget.value;}); input.addEventListener('change',saveIndicators);});
+  list.querySelectorAll('input[type="file"][data-upload-id]').forEach(input=>input.addEventListener('change',e=>{const file=e.currentTarget.files&&e.currentTarget.files[0]; const ind=externalIndicators.find(x=>x.id===e.currentTarget.dataset.uploadId); if(!file||!ind)return; const reader=new FileReader(); reader.onload=()=>{ind.image=String(reader.result||''); saveIndicators();}; reader.readAsDataURL(file);}));
+  list.querySelectorAll('.open-link-btn').forEach(btn=>btn.addEventListener('click',e=>{const id=e.currentTarget.dataset.id; const input=list.querySelector(`input[data-id="${id}"][data-field="link"]`); const url=normalizeUrl(input?input.value:''); if(!url)return; const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener noreferrer'; document.body.appendChild(a); a.click(); a.remove();}));
+  list.querySelectorAll('.read-page-btn').forEach(btn=>btn.addEventListener('click',async e=>{const ind=externalIndicators.find(x=>x.id===e.currentTarget.dataset.id); if(!ind)return; e.currentTarget.textContent='Lecture...'; try{const pageInfo=await readPageDescription(ind.link); const result=generateCommentFromOfficialText(ind,pageInfo); ind.aiComment=result.short; ind.aiDetail=result.detail; saveIndicators();}catch(err){ind.aiComment='Impossible de lire automatiquement cette page depuis le navigateur.'; ind.aiDetail='Cause probable : CORS, protection anti-bot, page dynamique ou proxy indisponible. Solution fiable : copier la section Chart Description dans ton commentaire perso, puis cliquer sur Commenter.'; saveIndicators();}}));
+  list.querySelectorAll('.comment-btn').forEach(btn=>btn.addEventListener('click',e=>{const ind=externalIndicators.find(x=>x.id===e.currentTarget.dataset.id); if(!ind)return; const r=detectIndicatorHints(ind); ind.aiComment=r.short; ind.aiDetail=r.detail; saveIndicators();}));
+  list.querySelectorAll('.toggle-detail-btn').forEach(btn=>btn.addEventListener('click',e=>{const panel=document.getElementById(e.currentTarget.dataset.detail); if(!panel)return; const open=panel.classList.contains('open'); panel.classList.toggle('open',!open); e.currentTarget.textContent=open?'Développer':'Réduire';}));
+  list.querySelectorAll('.copy-link-btn').forEach(btn=>btn.addEventListener('click',async e=>{const ind=externalIndicators.find(x=>x.id===e.currentTarget.dataset.id); const url=normalizeUrl(ind&&ind.link); if(!url)return; try{await navigator.clipboard.writeText(url); e.currentTarget.textContent='Copié';}catch(err){window.prompt('Copie le lien :',url);}}));
+}
+function runDiagnostics(){const res=[]; try{JSON.stringify(EXPLANATIONS);res.push('✔ EXPLANATIONS sérialisable');}catch(e){res.push('✖ EXPLANATIONS: '+e.message);} try{JSON.stringify(getSnapshotState());res.push('✔ Snapshot sérialisable');}catch(e){res.push('✖ Snapshot: '+e.message);} try{res.push(document.getElementById('table-body')?'✔ Table body trouvé':'✖ Table body introuvable');}catch(e){} try{JSON.stringify(externalIndicators);res.push('✔ Indicateurs externes sérialisables');}catch(e){res.push('✖ Indicateurs externes: '+e.message);} document.getElementById('diagnostics').innerHTML=res.map(line=>`<div class="${line.startsWith('✔')?'diag-pass':'diag-fail'}">${safeHtml(line)}</div>`).join('');}
+
+prefillRows();
+document.getElementById('analyze-btn').addEventListener('click',runAnalysis);
+document.getElementById('save-btn').addEventListener('click',saveSnapshot);
+document.getElementById('restore-last-btn').addEventListener('click',restoreLastSnapshot);
+document.getElementById('export-btn').addEventListener('click',exportJson);
+document.getElementById('import-btn').addEventListener('click',importJson);
+document.getElementById('diag-btn').addEventListener('click',runDiagnostics);
+document.getElementById('add-indicator-btn').addEventListener('click',()=>{externalIndicators.unshift(createIndicatorTemplate());saveIndicators();});
+document.getElementById('save-indicators-btn').addEventListener('click',saveIndicators);
+document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',e=>{const target=e.currentTarget.dataset.tab; document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b===e.currentTarget)); document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===target));}));
+renderTable(); renderHistory(); renderIndicators(); runDiagnostics();
+</script>
+</body>
+</html>
