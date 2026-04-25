@@ -300,24 +300,20 @@ function renderIndicators(){
   });
   list.querySelectorAll('input[data-field],textarea[data-field]').forEach(input=>{input.addEventListener('input',e=>{const ind=externalIndicators.find(x=>x.id===e.currentTarget.dataset.id); if(ind)ind[e.currentTarget.dataset.field]=e.currentTarget.value;}); input.addEventListener('change',saveIndicators);});
   list.querySelectorAll('input[type="file"][data-upload-id]').forEach(input=>input.addEventListener('change',e=>{const file=e.currentTarget.files&&e.currentTarget.files[0]; const ind=externalIndicators.find(x=>x.id===e.currentTarget.dataset.uploadId); if(!file||!ind)return; const reader=new FileReader(); reader.onload=()=>{ind.image=String(reader.result||''); saveIndicators();}; reader.readAsDataURL(file);}));
-  list.querySelectorAll('.open-link-btn').forEach(btn=>btn.addEventListener('click',e=>{const id=e.currentTarget.dataset.id; const input=list.querySelector(`input[data-id="${id}"][data-field="link"]`); const url=normalizeUrl(input?input.value:''); if(!url)return; const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener noreferrer'; document.body.appendChild(a); a.click(); a.remove();}));
-  list.querySelectorAll('.read-page-btn').forEach(btn=>btn.addEventListener('click',async e=>{const ind=externalIndicators.find(x=>x.id===e.currentTarget.dataset.id); if(!ind)return; e.currentTarget.textContent='Lecture...'; try{const pageInfo=await readPageDescription(ind.link); const result=generateCommentFromOfficialText(ind,pageInfo); ind.aiComment=result.short; ind.aiDetail=result.detail; saveIndicators();}catch(err){ind.aiComment='Impossible de lire automatiquement cette page depuis le navigateur.'; ind.aiDetail='Cause probable : CORS, protection anti-bot, page dynamique ou proxy indisponible. Solution fiable : copier la section Chart Description dans ton commentaire perso, puis cliquer sur Commenter.'; saveIndicators();}}));
-  list.querySelectorAll('.comment-btn').forEach(btn=>btn.addEventListener('click',e=>{const ind=externalIndicators.find(x=>x.id===e.currentTarget.dataset.id); if(!ind)return; const r=detectIndicatorHints(ind); ind.aiComment=r.short; ind.aiDetail=r.detail; saveIndicators();}));
-  list.querySelectorAll('.toggle-detail-btn').forEach(btn=>btn.addEventListener('click',e=>{const panel=document.getElementById(e.currentTarget.dataset.detail); if(!panel)return; const open=panel.classList.contains('open'); panel.classList.toggle('open',!open); e.currentTarget.textContent=open?'Développer':'Réduire';}));
-  list.querySelectorAll('.copy-link-btn').forEach(btn=>btn.addEventListener('click',async e=>{const ind=externalIndicators.find(x=>x.id===e.currentTarget.dataset.id); const url=normalizeUrl(ind&&ind.link); if(!url)return; try{await navigator.clipboard.writeText(url); e.currentTarget.textContent='Copié';}catch(err){window.prompt('Copie le lien :',url);}}));
-}
-function runDiagnostics(){const res=[]; try{JSON.stringify(EXPLANATIONS);res.push('✔ EXPLANATIONS sérialisable');}catch(e){res.push('✖ EXPLANATIONS: '+e.message);} try{JSON.stringify(getSnapshotState());res.push('✔ Snapshot sérialisable');}catch(e){res.push('✖ Snapshot: '+e.message);} try{res.push(document.getElementById('table-body')?'✔ Table body trouvé':'✖ Table body introuvable');}catch(e){} try{JSON.stringify(externalIndicators);res.push('✔ Indicateurs externes sérialisables');}catch(e){res.push('✖ Indicateurs externes: '+e.message);} document.getElementById('diagnostics').innerHTML=res.map(line=>`<div class="${line.startsWith('✔')?'diag-pass':'diag-fail'}">${safeHtml(line)}</div>`).join('');}
-
-prefillRows();
-document.getElementById('analyze-btn').addEventListener('click',runAnalysis);
-document.getElementById('save-btn').addEventListener('click',saveSnapshot);
-document.getElementById('restore-last-btn').addEventListener('click',restoreLastSnapshot);
-document.getElementById('export-btn').addEventListener('click',exportJson);
-document.getElementById('import-btn').addEventListener('click',importJson);
-document.getElementById('diag-btn').addEventListener('click',runDiagnostics);
-document.getElementById('add-indicator-btn').addEventListener('click',()=>{externalIndicators.unshift(createIndicatorTemplate());saveIndicators();});
+  list.querySelectorAll('.open-link-btn').forEach(btn=>btn.addEventListener('click',e=>{
+  const id=e.currentTarget.dataset.id;
+  const input=list.querySelector(`input[data-id="${id}"][data-field="link"]`);
+  const url=normalizeUrl(input?input.value:'');
+  if(!url) return;
+  window.open(url, '_blank');
+}));
 document.getElementById('save-indicators-btn').addEventListener('click',saveIndicators);
 document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',e=>{const target=e.currentTarget.dataset.tab; document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b===e.currentTarget)); document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===target));}));
+renderTable(); renderHistory(); renderIndicators(); runDiagnostics();
+</script>
+</body>
+</html>
+
 renderTable(); renderHistory(); renderIndicators(); runDiagnostics();
 </script>
 </body>
